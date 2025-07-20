@@ -11,11 +11,29 @@ class SafetyGuard:
         self.mode = mode
         self.target_latency = 50  # ms
         
-        # Korean crisis keywords
+        # Korean crisis keywords (with variations)
         self.crisis_keywords = {
-            'immediate': ['자살', '죽고싶', '죽을래', '목매', '투신'],
-            'high': ['우울', '힘들어', '포기', '무의미', '절망'],
-            'medium': ['외로워', '슬퍼', '불안', '걱정', '스트레스']
+            'immediate': ['자살', '죽고싶', '죽고 싶', '죽을래', '죽을 래', '목매', '투신', 
+                         '죽어', '죽을', '죽고', '죽는', '죽이고'],
+            'high': ['우울', '힘들어', '힘들 어', '포기', '무의미', '절망', '끝내', '사라지'],
+            'medium': ['외로워', '외로 워', '슬퍼', '슬 퍼', '불안', '걱정', '스트레스']
+        }
+        
+        # Regex patterns for more flexible matching
+        self.crisis_patterns = {
+            'immediate': [
+                r'죽\s*고\s*싶',     # 죽고싶, 죽고 싶, 죽 고 싶
+                r'죽\s*을\s*래',     # 죽을래, 죽을 래
+                r'자\s*살',          # 자살, 자 살
+                r'목\s*[을를]\s*매',  # 목을 매, 목 을 매
+                r'뛰\s*어\s*내\s*리'  # 뛰어내리, 뛰어 내리
+            ],
+            'high': [
+                r'우\s*울',          # 우울, 우 울
+                r'힘\s*들',          # 힘들어, 힘 들어
+                r'포\s*기',          # 포기, 포 기
+                r'절\s*망',          # 절망, 절 망
+            ]
         }
         
         self.emergency_response = """당신의 마음이 많이 힘드신 것 같아요. 
@@ -80,6 +98,8 @@ class SafetyGuard:
         await asyncio.sleep(0.005)  # 5ms
         
         risk_score = 0.0
+        
+        # Check exact keywords
         for level, keywords in self.crisis_keywords.items():
             for keyword in keywords:
                 if keyword in text:
@@ -89,6 +109,15 @@ class SafetyGuard:
                         risk_score = max(risk_score, 0.7)
                     elif level == 'medium':
                         risk_score = max(risk_score, 0.5)
+        
+        # Check regex patterns for flexible spacing
+        for level, patterns in self.crisis_patterns.items():
+            for pattern in patterns:
+                if re.search(pattern, text):
+                    if level == 'immediate':
+                        risk_score = max(risk_score, 0.95)
+                    elif level == 'high':
+                        risk_score = max(risk_score, 0.75)
         
         return risk_score
     
