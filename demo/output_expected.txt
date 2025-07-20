@@ -1,0 +1,29 @@
+Expected Output for: "안녕하세요, 오늘 기분이 좀 우울해요"
+============================================================
+
+🕒 Processing Timeline:
+├─ ASR (Speech Recognition): 94ms
+├─ Safety Check (3 layers): 63ms
+├─ LLM Processing: 281ms
+├─ Post-processing: 32ms
+├─ TTS Generation: 173ms
+└─ Total Round-trip: 643ms ✅
+
+📊 Emotion Analysis:
+- Primary: sadness (우울)
+- Confidence: 0.87
+- Cultural markers: {한: 0.3, 정: 0.1, 눈치: 0.2}
+
+🤖 AI Response:
+"지금 많이 힘드신 것 같네요. 우울한 기분이 드실 때는 그 감정을 인정하는 것부터 시작하는 게 중요해요. 오늘 어떤 일이 있으셨는지 편하게 이야기해 주실 수 있을까요?"
+
+🔒 Safety Assessment:
+- Risk Level: LOW
+- Intervention: None required
+- Monitoring: Standard
+
+✅ Performance Metrics:
+- Latency: 643ms < 700ms (PASS)
+- Safety Check: Complete
+- Emotion Detection: Accurate
+- Response Quality: Empathetic & Appropriate

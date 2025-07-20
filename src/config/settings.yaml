@@ -1,0 +1,74 @@
+# Intune-Care Voice AI Therapist Configuration
+# Competition settings for <700ms latency demonstration
+
+# Operating mode: mock (no APIs) or live (requires keys)
+mode: mock
+
+# Latency budget (milliseconds)
+# Total must be < 700ms for competition requirement
+latency_budget:
+  asr: 90           # Speech recognition
+  safety: 50        # 3-layer safety check
+  llm: 280          # LLM processing
+  postprocess: 30   # PII scrubbing & validation
+  tts: 180          # Voice synthesis
+  total_target: 700 # Competition requirement
+
+# Model configurations
+models:
+  asr: 
+    provider: deepgram
+    model: nova-2-korean
+    language: ko-KR
+  llm:
+    provider: openai
+    model: gpt-4o
+    temperature: 0.7
+    max_tokens: 500
+  tts:
+    provider: elevenlabs
+    voice_id: korean_therapist_v2
+    language: ko-KR
+
+# Safety system configuration
+safety:
+  # Risk thresholds
+  escalation_threshold: 0.8   # Immediate human intervention
+  monitoring_threshold: 0.6   # Enhanced monitoring
+  
+  # Response time requirements
+  layer1_timeout_ms: 5        # Keyword detection
+  layer2_timeout_ms: 20       # Context analysis
+  layer3_timeout_ms: 25       # Pattern analysis
+  
+  # Emergency contacts (Korean crisis hotlines)
+  emergency_resources:
+    - name: "생명의 전화"
+      number: "109"
+      available: "24/7"
+    - name: "정신건강 위기상담"
+      number: "1577-0199"
+      available: "24/7"
+
+# Korean emotion detection
+emotion:
+  cultural_markers:
+    - 한 (han)      # Collective sorrow
+    - 정 (jeong)    # Deep affection
+    - 눈치 (nunchi) # Social awareness
+  
+  confidence_threshold: 0.7
+
+# Performance optimization
+optimization:
+  parallel_processing: true
+  cache_common_responses: true
+  preload_models: true
+  connection_pooling: true
+
+# Compliance settings
+compliance:
+  log_retention_days: 7
+  pii_scrubbing: true
+  encryption: true
+  audit_trail: true

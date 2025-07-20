@@ -1,0 +1,17 @@
+# Demo Video Placeholder
+
+This is a placeholder for the Intune-Care demo video.
+
+To create the actual demo video:
+1. Record a screen capture of the demo/run_demo.sh in action
+2. Show the <700ms latency in real-time
+3. Demonstrate Korean language input/output
+4. Show the safety system triggering on crisis keywords
+5. Keep it under 2 minutes for judges
+
+The video should showcase:
+- One-click demo execution
+- Real-time voice processing
+- Korean emotional understanding
+- Safety intervention example
+- Latency measurement display

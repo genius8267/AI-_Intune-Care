@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<safety_configuration>
+  <!-- Intune-Care Safety Rules for Korean Mental Health -->
+  
+  <crisis_keywords>
+    <category level="immediate" action="escalate">
+      <keyword>자살</keyword>
+      <keyword>죽고싶</keyword>
+      <keyword>죽을래</keyword>
+      <keyword>목매</keyword>
+      <keyword>투신</keyword>
+    </category>
+    
+    <category level="high" action="monitor">
+      <keyword>우울</keyword>
+      <keyword>힘들어</keyword>
+      <keyword>포기</keyword>
+      <keyword>무의미</keyword>
+      <keyword>절망</keyword>
+    </category>
+    
+    <category level="medium" action="support">
+      <keyword>외로워</keyword>
+      <keyword>슬퍼</keyword>
+      <keyword>불안</keyword>
+      <keyword>걱정</keyword>
+      <keyword>스트레스</keyword>
+    </category>
+  </crisis_keywords>
+  
+  <response_templates>
+    <template type="crisis">
+      <text lang="ko">
+        당신의 마음이 많이 힘드신 것 같아요. 
+        지금 이 순간, 당신은 혼자가 아닙니다.
+        잠시만 기다려 주세요. 곧 전문 상담사님이 연결될 거예요.
+      </text>
+    </template>
+    
+    <template type="support">
+      <text lang="ko">
+        힘든 마음을 표현해 주셔서 감사합니다.
+        함께 이야기하면서 마음의 짐을 조금씩 덜어보아요.
+      </text>
+    </template>
+  </response_templates>
+  
+  <escalation_protocol>
+    <step priority="1">Log incident with timestamp</step>
+    <step priority="2">Send alert to on-call team</step>
+    <step priority="3">Maintain AI conversation</step>
+    <step priority="4">Connect human within 60 seconds</step>
+  </escalation_protocol>
+</safety_configuration>

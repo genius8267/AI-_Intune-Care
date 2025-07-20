@@ -1,0 +1,14 @@
+{"text": "요즘 너무 우울해요. 아무것도 하고 싶지 않아요.", "emotion": "우울", "risk_level": "medium", "intervention": "support", "cultural_marker": "한"}
+{"text": "회사에서 스트레스를 너무 많이 받아요.", "emotion": "스트레스", "risk_level": "low", "intervention": "listen", "cultural_marker": null}
+{"text": "가족들과 대화가 잘 안 통해요. 서로 이해하지 못하는 것 같아요.", "emotion": "답답함", "risk_level": "low", "intervention": "mediate", "cultural_marker": "정"}
+{"text": "죽고 싶다는 생각이 들어요. 더 이상 못 견디겠어요.", "emotion": "절망", "risk_level": "immediate", "intervention": "crisis", "cultural_marker": "한"}
+{"text": "친구들이 저를 따돌리는 것 같아요. 너무 외로워요.", "emotion": "외로움", "risk_level": "medium", "intervention": "support", "cultural_marker": null}
+{"text": "시험 때문에 불안해서 잠을 못 자고 있어요.", "emotion": "불안", "risk_level": "low", "intervention": "coping", "cultural_marker": null}
+{"text": "부모님의 기대가 너무 부담스러워요. 눈치를 너무 많이 봐요.", "emotion": "부담", "risk_level": "medium", "intervention": "boundary", "cultural_marker": "눈치"}
+{"text": "연인과 헤어진 후로 아무것도 하기 싫어요.", "emotion": "상실감", "risk_level": "medium", "intervention": "grief", "cultural_marker": null}
+{"text": "매일 술을 마시지 않으면 잠들 수가 없어요.", "emotion": "의존", "risk_level": "high", "intervention": "referral", "cultural_marker": null}
+{"text": "다른 사람들과 어울리는 게 너무 어려워요.", "emotion": "사회불안", "risk_level": "low", "intervention": "skills", "cultural_marker": "눈치"}
+{"text": "화가 자꾸 나서 주변 사람들과 싸우게 돼요.", "emotion": "분노", "risk_level": "medium", "intervention": "anger", "cultural_marker": null}
+{"text": "내일이 오는 게 두려워요. 미래가 불안해요.", "emotion": "불안", "risk_level": "medium", "intervention": "future", "cultural_marker": null}
+{"text": "아무도 저를 이해해주지 않아요. 혼자인 것 같아요.", "emotion": "고립감", "risk_level": "medium", "intervention": "connection", "cultural_marker": "정"}
+{"text": "목을 매고 싶어요. 준
