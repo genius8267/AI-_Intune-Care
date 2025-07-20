@@ -200,11 +200,6 @@ async def check_safety(text: str) -> SafetyResult:
 3. **보험**: 정신건강 보장
 4. **정부**: 공공 보건 이니셔티브
 
-### 가격 정책
-- **무료**: 월 3회 세션
-- **프리미엄**: 월 ₩9,900 무제한
-- **기업**: 맞춤 가격
-
 ## 🚀 로드맵
 
 ### 1단계 (현재) - MVP
@@ -235,12 +230,6 @@ async def check_safety(text: str) -> SafetyResult:
 | 안전 시스템 | [`src/pipeline/safety.py`](src/pipeline/safety.py) | 3단계 구현 |
 | 규정 준수 | [`docs/compliance-matrix.md`](docs/compliance-matrix.md) | HIPAA/GDPR/PIPA |
 | 테스트 | [`tests/`](tests/) | 단위 및 E2E 테스트 |
-
-## 📞 연락처
-
-- **이메일**: team@intune-care.ai
-- **데모**: https://demo.intune-care.ai
-- **GitHub**: https://github.com/genius8267/AI-_Intune-Care
 
 ---
 
