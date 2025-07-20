@@ -1,0 +1,170 @@
+version: '3.8'
+
+services:
+  # API Gateway
+  gateway:
+    build: ./services/gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - ENV=development
+      - LOG_LEVEL=info
+      - CORS_ORIGINS=http://localhost:3000
+    depends_on:
+      - redis
+      - inference
+      - safety-guard
+      - tts-proxy
+    networks:
+      - intune-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ML Inference Service
+  inference:
+    build: ./services/inference
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DEEPGRAM_API_KEY=${DEEPGRAM_API_KEY}
+      - MODEL_NAME=gpt-4o
+      - MAX_TOKENS=500
+      - TEMPERATURE=0.7
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+    networks:
+      - intune-network
+    volumes:
+      - ./models:/app/models:ro
+
+  # Safety Guard Service
+  safety-guard:
+    build: ./services/safety_guard
+    environment:
+      - SAFETY_MODE=strict
+      - ESCALATION_WEBHOOK=${ESCALATION_WEBHOOK}
+      - LOG_LEVEL=debug
+    networks:
+      - intune-network
+    volumes:
+      - ./data/safety-triggers:/app/triggers:ro
+
+  # TTS Proxy Service
+  tts-proxy:
+    build: ./services/tts_proxy
+    environment:
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+      - VOICE_ID=korean_therapist_v2
+      - STREAMING_ENABLED=true
+    networks:
+      - intune-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - intune-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=intune
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=intune_care
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - intune-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U intune"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Web Client
+  web-client:
+    build: ./apps/web_client
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8080
+    depends_on:
+      - gateway
+    networks:
+      - intune-network
+
+  # Monitoring - Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./infra/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - "9090:9090"
+    networks:
+      - intune-network
+
+  # Monitoring - Grafana
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./infra/monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./infra/monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - intune-network
+
+  # Demo Data Seeder
+  demo-seeder:
+    build: 
+      context: ./scripts
+      dockerfile: Dockerfile.seeder
+    environment:
+      - API_URL=http://gateway:8080
+      - SEED_COUNT=100
+    depends_on:
+      gateway:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - intune-network
+    profiles:
+      - demo
+
+volumes:
+  redis-data:
+  postgres-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  intune-network:
+    driver: bridge

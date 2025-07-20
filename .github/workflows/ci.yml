@@ -1,0 +1,194 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  DOCKER_REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository }}
+
+jobs:
+  lint-and-test:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [gateway, inference, safety_guard, web_client]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Go (for gateway)
+      if: matrix.service == 'gateway'
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.21'
+    
+    - name: Setup Python (for inference)
+      if: matrix.service == 'inference'
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Setup Node.js (for safety_guard and web_client)
+      if: matrix.service == 'safety_guard' || matrix.service == 'web_client'
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Run Tests
+      run: |
+        cd services/${{ matrix.service }} || cd apps/${{ matrix.service }}
+        if [ -f "go.mod" ]; then
+          go test ./...
+        elif [ -f "requirements.txt" ]; then
+          pip install -r requirements.txt
+          python -m pytest
+        elif [ -f "package.json" ]; then
+          npm ci
+          npm test
+        fi
+
+  build-and-push:
+    name: Build and Push Docker Images
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    
+    strategy:
+      matrix:
+        service: 
+          - { name: gateway, path: services/gateway }
+          - { name: inference, path: services/inference }
+          - { name: safety_guard, path: services/safety_guard }
+          - { name: web_client, path: apps/web_client }
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.DOCKER_REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ${{ matrix.service.path }}
+        push: true
+        tags: |
+          ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.service.name }}:latest
+          ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.service.name }}:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  latency-benchmark:
+    name: Latency Benchmark
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Run latency benchmarks
+      run: |
+        cd tests/benchmarks
+        pip install -r requirements.txt
+        python run_latency_test.py
+    
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v4
+      with:
+        name: latency-results
+        path: tests/benchmarks/results/
+    
+    - name: Update README badge
+      run: |
+        # Extract P95 latency and update badge
+        P95=$(python -c "import json; print(json.load(open('tests/benchmarks/results/latest.json'))['p95'])")
+        echo "P95 Latency: ${P95}ms"
+        # Would update README badge here
+
+  terraform-validate:
+    name: Terraform Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+    
+    - name: Terraform Format Check
+      run: |
+        cd infra/terraform
+        terraform fmt -check
+    
+    - name: Terraform Init
+      run: |
+        cd infra/terraform
+        terraform init -backend=false
+    
+    - name: Terraform Validate
+      run: |
+        cd infra/terraform
+        terraform validate
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: [build-and-push, security-scan]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-northeast-2
+    
+    - name: Deploy to EKS
+      run: |
+        # Update kubeconfig
+        aws eks update-kubeconfig --name intune-care-staging
+        
+        # Apply Kubernetes manifests
+        kubectl apply -f infra/k8s/staging/

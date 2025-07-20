@@ -1,0 +1,142 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+vendor/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+.next/
+out/
+target/
+*.so
+*.dylib
+*.dll
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+.coverage
+htmlcov/
+.pytest_cache/
+.phpunit.result.cache
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Kubernetes
+*.kubeconfig
+secrets.yaml
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+*.tfvars
+!*.tfvars.example
+
+# Model files (large)
+*.onnx
+*.pt
+*.pth
+*.h5
+*.pb
+models/emotion_recognizer/weights/
+
+# Audio files (privacy)
+*.wav
+*.mp3
+*.m4a
+*.flac
+audio_sessions/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Certificates
+*.pem
+*.key
+*.crt
+*.csr
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Cache
+.cache/
+*.cache
+redis-data/
+postgres-data/
+
+# Monitoring data
+prometheus-data/
+grafana-data/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Credentials
+credentials.json
+service-account.json
+aws-credentials
+
+# Local development
+.local/
+local-data/
